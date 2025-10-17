@@ -2,6 +2,11 @@ import type { Socket } from 'socket.io';
 
 export type SessionStatus = 'idle' | 'searching' | 'connected' | 'public-room';
 
+export interface UserPreferences {
+  interests: string[];
+  mood: string;
+}
+
 export interface Session {
   id: string;
   displayName: string;
@@ -11,6 +16,7 @@ export interface Session {
   queuedAt?: number;
   blocked: Set<string>;
   createdAt: number;
+  preferences?: UserPreferences;
 }
 
 export type RoomMode = 'direct' | 'public';

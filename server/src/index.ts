@@ -11,7 +11,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/health", (req, res) => res.json({ status: "ok", ts: Date.now() }));
+app.get("/health", (req, res) => res.json({ 
+  status: "ok", 
+  ts: Date.now(),
+  onlineUsers: matchmaker.getOnlineCount(),
+  waitingUsers: matchmaker.getWaitingCount(),
+}));
 
 const server = http.createServer(app);
 
@@ -48,7 +53,7 @@ io.on("connection", (socket) => {
     socket.emit("session:registered", { sessionId: sid });
   });
 
-  socket.on("match:find", () => {
+  socket.on("match:find", (preferences) => {
     const sid = (socket as any).sessionId ?? socket.id;
     const sessionObj = {
       id: sid,
@@ -57,8 +62,9 @@ io.on("connection", (socket) => {
       socketId: socket.id,
       blocked: new Set<string>(),
       createdAt: Date.now(),
+      preferences: preferences || { interests: ['random'], mood: 'chill' },
     };
-  matchmaker.joinQueue(sessionObj as any);
+    matchmaker.joinQueue(sessionObj as any);
   });
 
   socket.on("match:cancel", () => {
